@@ -102,7 +102,6 @@ export const githubJobs = restate.service({
               .set({
                 description,
                 starredAt,
-                updatedAt: sql`now()`,
                 descriptionUpdatedAt: sql`now()`,
               })
               .where(eq(schema.reposTable.repo, fullName))
@@ -118,6 +117,7 @@ export const githubJobs = restate.service({
                   repo: fullName,
                   description,
                   initialDescription: description,
+                  descriptionUpdatedAt: sql`now()`,
                   starredAt,
                 })
                 .returning({
@@ -197,7 +197,6 @@ export const githubJobs = restate.service({
             readme,
             initialReadme: sql`COALESCE(${schema.reposTable.initialReadme}, ${readme})`,
             readmeUpdatedAt: sql`now()`,
-            updatedAt: sql`now()`,
           })
           .where(eq(schema.reposTable.repo, fullName))
           .returning({ id: schema.reposTable.id });
