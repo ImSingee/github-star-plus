@@ -1,6 +1,11 @@
 import { sql } from 'drizzle-orm';
-import { timestamp as _timestamp, pgTable, text } from 'drizzle-orm/pg-core';
-import { ulid as genUlid0 } from 'ulid';
+import {
+  timestamp as _timestamp,
+  pgTable,
+  serial,
+  text,
+  uniqueIndex,
+} from 'drizzle-orm/pg-core';
 
 /** ================== utils ================== */
 function timestamp(name?: string) {
@@ -8,18 +13,6 @@ function timestamp(name?: string) {
     return _timestamp({ withTimezone: true, mode: 'date' });
   }
   return _timestamp(name, { withTimezone: true, mode: 'date' });
-}
-
-function genUlid() {
-  return genUlid0().toLowerCase();
-}
-
-function ulid(name?: string) {
-  if (!name) {
-    return text();
-  } else {
-    return text(name);
-  }
 }
 
 const createdAt = timestamp('created_at').notNull().defaultNow();
@@ -32,10 +25,20 @@ const updatedAt = timestamp('updated_at')
 // const RESTRICT = { onUpdate: "restrict", onDelete: "restrict" } as const;
 // const CASCADE = { onUpdate: "cascade", onDelete: "cascade" } as const;
 
-export const demoThings = pgTable('demo_things', {
-  id: ulid().$defaultFn(genUlid).primaryKey(),
-  name: text().notNull(),
-  description: text(),
-  createdAt,
-  updatedAt,
-});
+export const reposTable = pgTable(
+  'repos',
+  {
+    id: serial('id').primaryKey(),
+    repo: text('repo').notNull(),
+    description: text('description'),
+    initialDescription: text('initial_description'),
+    readme: text('readme').default(''),
+    initialReadme: text('initial_readme'),
+    starredAt: timestamp('starred_at'),
+    descriptionUpdatedAt: timestamp('description_updated_at'),
+    readmeUpdatedAt: timestamp('readme_updated_at'),
+    createdAt,
+    updatedAt,
+  },
+  (table) => [uniqueIndex('repos_repo').on(table.repo)],
+);

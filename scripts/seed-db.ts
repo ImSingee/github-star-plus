@@ -1,9 +1,4 @@
-import { ulid as genUlid0 } from 'ulid';
 import { db, schema } from '@proj/db';
-
-function genUlid() {
-  return genUlid0().toLowerCase();
-}
 
 // // Small reproducible PRNG for deterministic sampling (M2M/random votes/random subscriptions)
 // function makePrng(seedNum = 42) {
@@ -21,76 +16,42 @@ function genUlid() {
 async function clearDatabase() {
   console.log('🧹 Clearing existing data...');
 
-  // Deletion order matters: remove child tables before parent tables
-  await db.delete(schema.demoThings);
+  await db.delete(schema.reposTable);
 
   console.log('✅ Database cleared');
 }
 
-const sampleDemoThings = [
+const sampleRepos = [
   {
-    name: 'Widget Alpha',
-    description: 'A versatile component for dashboard layouts',
+    repo: 'octocat/Hello-World',
+    description: 'My first repository on GitHub!',
   },
   {
-    name: 'Data Connector',
-    description: 'Bridges external APIs with internal systems',
-  },
-  {
-    name: 'Report Generator',
-    description: 'Creates automated PDF reports from templates',
-  },
-  {
-    name: 'Task Scheduler',
-    description: 'Manages recurring jobs and background processes',
-  },
-  {
-    name: 'Notification Hub',
-    description: 'Centralized service for push and email alerts',
-  },
-  {
-    name: 'File Processor',
-    description: 'Handles batch uploads and format conversions',
-  },
-  {
-    name: 'Analytics Engine',
-    description: 'Tracks user behavior and generates insights',
-  },
-  {
-    name: 'Cache Manager',
-    description: 'Optimizes data retrieval with smart caching',
-  },
-  {
-    name: 'Auth Gateway',
-    description: 'Provides SSO and token-based authentication',
-  },
-  {
-    name: 'Search Indexer',
-    description: 'Powers full-text search across all content',
+    repo: 'vercel/next.js',
+    description: 'The React Framework',
   },
 ];
 
-async function seedDemoThings() {
-  console.log('📦 Inserting demo things...');
+async function seedRepos() {
+  console.log('📦 Inserting repos...');
 
-  const seededDemoThings = await db
-    .insert(schema.demoThings)
+  const seededRepos = await db
+    .insert(schema.reposTable)
     .values(
-      sampleDemoThings.map((thing) => ({
-        id: genUlid(),
-        name: thing.name,
-        description: thing.description,
+      sampleRepos.map((repo) => ({
+        repo: repo.repo,
+        description: repo.description,
       })),
     )
-    .returning({ id: schema.demoThings.id, name: schema.demoThings.name });
+    .returning({ id: schema.reposTable.id, repo: schema.reposTable.repo });
 
-  console.log(`✅ Seeded ${seededDemoThings.length} demo things`);
+  console.log(`✅ Seeded ${seededRepos.length} repos`);
 }
 
 async function main() {
   await clearDatabase();
 
-  await seedDemoThings();
+  await seedRepos();
 
   console.log('🎉 Finished seeding all apps!');
   process.exit(0);
