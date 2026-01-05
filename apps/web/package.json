@@ -33,7 +33,7 @@
     "@tanstack/router-plugin": "^1.144.0",
     "copy-to-clipboard": "^3.3.3",
     "dayjs": "^1.11.19",
-    "drizzle-orm": "^0.45.1",
+    "drizzle-orm": "1.0.0-beta.8-734e789",
     "postgres": "^3.4.7",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",

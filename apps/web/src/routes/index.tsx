@@ -24,7 +24,7 @@ import { db, schema } from '@proj/db';
 // Server Functions
 const getDemoThings = createServerFn().handler(async () => {
   return db.query.demoThings.findMany({
-    orderBy: (demoThings, { desc }) => [desc(demoThings.createdAt)],
+    orderBy: { createdAt: 'desc' },
   });
 });
 

@@ -1,3 +1,4 @@
+import { sql } from 'drizzle-orm';
 import { timestamp as _timestamp, pgTable, text } from 'drizzle-orm/pg-core';
 import { ulid as genUlid0 } from 'ulid';
 
@@ -25,8 +26,7 @@ const createdAt = timestamp('created_at').notNull().defaultNow();
 const updatedAt = timestamp('updated_at')
   .notNull()
   .defaultNow()
-  // use sql`now()` if https://github.com/drizzle-team/drizzle-orm/issues/2388 get fixed
-  .$onUpdate(() => new Date());
+  .$onUpdate(() => sql`now()`);
 // const deletedAt = timestamp("deleted_at");
 
 // const RESTRICT = { onUpdate: "restrict", onDelete: "restrict" } as const;

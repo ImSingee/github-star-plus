@@ -10,7 +10,7 @@ export async function runMigrations() {
 
   // Use a separate connection for migrations with max: 1
   const migrationClient = postgres(DATABASE_URL, { max: 1 });
-  const db = drizzle(migrationClient);
+  const db = drizzle({ client: migrationClient });
 
   console.log('Running database migrations...');
 

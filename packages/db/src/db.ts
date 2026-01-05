@@ -1,8 +1,5 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
-
-import * as schema from './schema';
-
-export { schema };
+import { relations } from './relations';
 
 const { DATABASE_URL } = process.env;
 if (!DATABASE_URL) {
@@ -11,7 +8,7 @@ if (!DATABASE_URL) {
 
 export const db = drizzle({
   connection: DATABASE_URL,
-  schema,
+  relations,
   casing: 'snake_case',
   logger: process.env.NODE_ENV === 'development',
 });
