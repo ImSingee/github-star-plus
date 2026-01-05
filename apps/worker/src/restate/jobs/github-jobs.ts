@@ -28,7 +28,14 @@ export const githubJobs = restate.service({
       const force = input?.force ?? false;
 
       if (!force && process.env.NODE_ENV !== 'production') {
-        return { skipped: true, reason: 'NODE_ENV is not production' };
+        return {
+          skipped: true,
+          reason: 'NODE_ENV is not production',
+          pages: 0,
+          totalStarred: 0,
+          updatedRepos: 0,
+          readmeUpdated: 0,
+        };
       }
 
       const octokit = getOctokit();
@@ -36,6 +43,8 @@ export const githubJobs = restate.service({
       let page = 1;
       const per_page = 100;
       let totalStarred = 0;
+      let updatedRepos = 0;
+      let readmeUpdated = 0;
 
       while (true) {
         const { data, headers } = await ctx.run(
@@ -60,7 +69,11 @@ export const githubJobs = restate.service({
         totalStarred += items.length;
 
         // Process in the same service (durable step)
-        await ctx.serviceClient(githubJobs).updateRepoInfo(items);
+        const { processed, readmeUpdated: pageReadmeUpdated } = await ctx
+          .serviceClient(githubJobs)
+          .updateRepoInfo(items);
+        updatedRepos += processed;
+        readmeUpdated += pageReadmeUpdated;
 
         if (!hasNextPage(headers.link)) {
           break;
@@ -68,53 +81,72 @@ export const githubJobs = restate.service({
         page += 1;
       }
 
-      return { pages: page, totalStarred };
+      return { pages: page, totalStarred, updatedRepos, readmeUpdated };
     },
 
     updateRepoInfo: async (
       ctx: restate.Context,
       items: Array<StarredRepoItem>,
     ) => {
+      let readmeUpdated = 0;
       for (const item of items) {
-        await ctx.run(`repo-${item.repo.full_name}`, async () => {
-          const fullName = item.repo.full_name;
-          const starredAt = new Date(item.starred_at);
+        const fullName = item.repo.full_name;
+        const starredAt = new Date(item.starred_at);
+        const description = item.repo.description ?? '';
 
-          const [dbRepo] = await db
-            .insert(schema.reposTable)
-            .values({
-              repo: fullName,
-              description: item.repo.description ?? '',
-              initialDescription: item.repo.description ?? '',
-              starredAt,
-            })
-            .onConflictDoUpdate({
-              target: schema.reposTable.repo,
-              set: {
-                description: item.repo.description ?? '',
+        const { readmeUpdatedAtIso } = await ctx.run(
+          `upsert-repo-${fullName}`,
+          async () => {
+            const [dbRepo] = await db
+              .insert(schema.reposTable)
+              .values({
+                repo: fullName,
+                description,
+                initialDescription: description,
                 starredAt,
-                updatedAt: sql`now()`,
-                descriptionUpdatedAt: sql`now()`,
-              },
-            })
-            .returning({
-              id: schema.reposTable.id,
-              readmeUpdatedAt: schema.reposTable.readmeUpdatedAt,
-            });
+              })
+              .onConflictDoUpdate({
+                target: schema.reposTable.repo,
+                set: {
+                  description,
+                  starredAt,
+                  updatedAt: sql`now()`,
+                  descriptionUpdatedAt: sql`now()`,
+                },
+              })
+              .returning({
+                readmeUpdatedAt: schema.reposTable.readmeUpdatedAt,
+              });
 
-          const shouldUpdateReadme = shouldUpdate(
-            dbRepo?.readmeUpdatedAt ?? null,
-            30,
-          );
-          if (shouldUpdateReadme) {
-            ctx
-              .serviceSendClient(githubJobs)
-              .updateRepoReadme({ repo: fullName });
+            // ctx.run input/output is serialized (Date -> ISO string), so store a stable string.
+            const raw = dbRepo?.readmeUpdatedAt ?? null;
+            const iso = raw ? new Date(raw).toISOString() : null;
+            return { readmeUpdatedAtIso: iso };
+          },
+        );
+
+        const readmeUpdatedAt = readmeUpdatedAtIso
+          ? new Date(readmeUpdatedAtIso)
+          : null;
+
+        // shouldUpdate() uses Math.random(), so we record the decision in a ctx.run step.
+        const shouldUpdateReadme = await ctx.run(
+          `should-update-readme-${fullName}`,
+          () => shouldUpdate(readmeUpdatedAt, 30),
+        );
+
+        if (shouldUpdateReadme) {
+          const result = await ctx
+            .serviceClient(githubJobs)
+            .updateRepoReadme({ repo: fullName });
+
+          if ('updatedId' in result && result.updatedId !== null) {
+            readmeUpdated += 1;
           }
-        });
+        }
       }
 
-      return { processed: items.length };
+      return { processed: items.length, readmeUpdated };
     },
 
     updateRepoReadme: async (
