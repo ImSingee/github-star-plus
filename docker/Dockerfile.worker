@@ -9,21 +9,20 @@ RUN corepack enable
 FROM base AS deps
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml* turbo.json ./
 COPY apps/web/package.json apps/web/package.json
+COPY apps/worker/package.json apps/worker/package.json
 COPY packages/db/package.json packages/db/package.json
+COPY packages/github/package.json packages/github/package.json
 RUN pnpm install --frozen-lockfile --ignore-scripts
 
-FROM base AS build
+FROM base AS runner
+ENV NODE_ENV=production
 COPY . .
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
+COPY --from=deps /app/apps/worker/node_modules ./apps/worker/node_modules
 COPY --from=deps /app/packages/db/node_modules ./packages/db/node_modules
-RUN NITRO_PRESET=node_server pnpm --filter @proj/web build
-
-FROM node:24-slim AS runner
-WORKDIR /app
-ENV NODE_ENV=production
-ENV HOST=0.0.0.0
+COPY --from=deps /app/packages/github/node_modules ./packages/github/node_modules
+# Ensure migrations are available (runMigrations falls back to /app/migrations).
 COPY packages/db/migrations ./migrations
-COPY --from=build /app/apps/web/.output ./.output
-EXPOSE 3000
-CMD ["node", ".output/server/index.mjs"]
+EXPOSE 9080
+CMD ["pnpm", "--filter", "@proj/worker", "start"]
+
