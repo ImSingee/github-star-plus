@@ -168,17 +168,6 @@ Commands:
 
 Example usage with TanStack Start server functions is available at `src/routes/dynamic.tsx`.
 
-### Better Auth
-
-The project uses [Better Auth](https://www.better-auth.com/) for authentication. It provides a comprehensive auth solution with email/password, OAuth providers, and more.
-
-- Server config: `src/auth/server.ts` (import as `import { auth } from '~auth/server'`)
-- Client config: `src/auth/client.ts` (import as `import { authClient } from '~auth/client'`)
-- Auth schema: `src/db/auth-schema.ts` (user, session, account, verification tables)
-- API route: `src/routes/api/auth/$.ts` (handles all `/api/auth/*` requests)
-
-You can use the context7 mcp tool with the library id `/better-auth/better-auth` to load (or search) docs.
-
 ### Context7
 
 If you need to get some other documentations that you don't know exactly, you can use the context7 mcp tool.

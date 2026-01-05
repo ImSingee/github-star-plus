@@ -14,7 +14,6 @@
     "lint": "turbo run lint",
     "format": "prettier --write . && eslint --fix . && eslint .",
     "check:types": "turbo run check:types",
-    "auth:generate": "pnpm --filter @proj/web auth:generate",
     "migrations:generate": "pnpm --filter @proj/db migrations:generate",
     "migrations:apply": "pnpm --filter @proj/db migrations:apply",
     "migrations:push": "pnpm --filter @proj/db migrations:push",
