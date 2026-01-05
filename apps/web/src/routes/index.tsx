@@ -19,7 +19,7 @@ import { useForm } from '@mantine/form';
 import { IconPlus, IconTrash } from '@tabler/icons-react';
 import { toast } from 'sonner';
 import { modals } from '@mantine/modals';
-import { db, schema } from '~/db';
+import { db, schema } from '@proj/db';
 
 // Server Functions
 const getDemoThings = createServerFn().handler(async () => {

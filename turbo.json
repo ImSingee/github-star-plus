@@ -1,0 +1,45 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".output/**", "dist/**"]
+    },
+    "preview": {
+      "cache": false,
+      "persistent": true
+    },
+    "check:types": {
+      "dependsOn": ["^check:types"]
+    },
+    "lint": {
+      "dependsOn": ["^lint"]
+    },
+    "test": {
+      "dependsOn": ["^test"]
+    },
+    "format": {
+      "cache": false
+    },
+    "auth:generate": {
+      "cache": false
+    },
+    "migrations:generate": {
+      "cache": false
+    },
+    "migrations:apply": {
+      "cache": false
+    },
+    "migrations:push": {
+      "cache": false
+    },
+    "drizzle:studio": {
+      "cache": false
+    }
+  }
+}
