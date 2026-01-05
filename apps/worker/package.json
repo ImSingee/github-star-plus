@@ -1,0 +1,25 @@
+{
+  "name": "@proj/worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/restate/app.ts",
+    "build": "tsc --noEmit -p tsconfig.json",
+    "start": "tsx src/restate/app.ts",
+    "test": "node -e \"console.log('no tests for @proj/worker')\"",
+    "lint": "eslint .",
+    "format": "prettier --write . && eslint --fix . && eslint .",
+    "check:types": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@proj/db": "workspace:*",
+    "@proj/github": "workspace:*",
+    "@restatedev/restate-sdk": "^1.0.0",
+    "cron-parser": "^5.4.0",
+    "drizzle-orm": "1.0.0-beta.8-734e789",
+    "octokit": "^4.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0"
+  }
+}

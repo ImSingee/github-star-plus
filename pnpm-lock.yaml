@@ -175,6 +175,31 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3(typescript@5.9.3)(vite@7.3.0(@types/node@24.10.4)(jiti@2.6.1)(lightningcss@1.30.2)(sugarss@5.0.1(postcss@8.5.6))(tsx@4.21.0)(yaml@2.8.2))
 
+  apps/worker:
+    dependencies:
+      '@proj/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@proj/github':
+        specifier: workspace:*
+        version: link:../../packages/github
+      '@restatedev/restate-sdk':
+        specifier: ^1.0.0
+        version: 1.9.1
+      cron-parser:
+        specifier: ^5.4.0
+        version: 5.4.0
+      drizzle-orm:
+        specifier: 1.0.0-beta.8-734e789
+        version: 1.0.0-beta.8-734e789(@prisma/client@5.22.0(prisma@5.22.0))(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.8)(@types/pg@8.16.0)(better-sqlite3@12.5.0)(mssql@11.0.1)(pg@8.16.3)(postgres@3.4.7)(prisma@5.22.0)
+      octokit:
+        specifier: ^4.0.0
+        version: 4.1.4
+    devDependencies:
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
+
   packages/db:
     dependencies:
       drizzle-orm:
@@ -1281,6 +1306,14 @@ packages:
       react-redux:
         optional: true
 
+  '@restatedev/restate-sdk-core@1.9.1':
+    resolution: {integrity: sha512-/ISSWBF0YAH0mhIhnd6VFuFLMp6AckdfGyfU+CdJDccysxH1qp0QuI5oJ5UArexoFTI6LXrWkYg2/nZebO96gA==}
+    engines: {node: '>= 20.19'}
+
+  '@restatedev/restate-sdk@1.9.1':
+    resolution: {integrity: sha512-8w6t7cG5mXMgI+YPxIuPuplVX12lKbgne1byzmkQtif9lpPT6gjd7ce1EmWrUtsD25WCL+lf4iKU/usfqaXQCg==}
+    engines: {node: '>= 20.19'}
+
   '@rolldown/pluginutils@1.0.0-beta.40':
     resolution: {integrity: sha512-s3GeJKSQOwBlzdUrj4ISjJj5SfSh+aqn0wjOar4Bx95iV1ETI7F6S/5hLcfAxZ9kXDcyrAkxPlqmd1ZITttf+w==}
 
@@ -2214,6 +2247,10 @@ packages:
 
   copy-to-clipboard@3.3.3:
     resolution: {integrity: sha512-2KV8NhB5JqC3ky0r9PMCAZKbUHSwtEo4CwCs0KXgruG43gX5PMqDEBbVU4OUzw2MuAWUfsuFmWvEKG5QRfSnJA==}
+
+  cron-parser@5.4.0:
+    resolution: {integrity: sha512-HxYB8vTvnQFx4dLsZpGRa0uHp6X3qIzS3ZJgJ9v6l/5TJMgeWQbLkR5yiJ5hOxGbc9+jCADDnydIe15ReLZnJA==}
+    engines: {node: '>=18'}
 
   cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
@@ -3356,6 +3393,10 @@ packages:
 
   lru-cache@5.1.1:
     resolution: {integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==}
+
+  luxon@3.7.2:
+    resolution: {integrity: sha512-vtEhXh/gNjI9Yg1u4jX/0YVPMvxzHuGgCm6tC5kZyb08yjGWGnqAjGJvcXbqQR2P3MyMEFnRbpcdFS6PBcLqew==}
+    engines: {node: '>=12'}
 
   lz-string@1.5.0:
     resolution: {integrity: sha512-h5bgJWpxJNswbU7qCrV0tIKQCaS3blPDrqKWx+QxzuzL1zGUzij9XCWLrSLsJPu5t+eWA/ycetzYAO5IOMcWAQ==}
@@ -5623,6 +5664,12 @@ snapshots:
       react: 19.2.3
       react-redux: 9.2.0(@types/react@19.2.7)(react@19.2.3)(redux@5.0.1)
 
+  '@restatedev/restate-sdk-core@1.9.1': {}
+
+  '@restatedev/restate-sdk@1.9.1':
+    dependencies:
+      '@restatedev/restate-sdk-core': 1.9.1
+
   '@rolldown/pluginutils@1.0.0-beta.40': {}
 
   '@rolldown/pluginutils@1.0.0-beta.53': {}
@@ -6708,6 +6755,10 @@ snapshots:
   copy-to-clipboard@3.3.3:
     dependencies:
       toggle-selection: 1.0.6
+
+  cron-parser@5.4.0:
+    dependencies:
+      luxon: 3.7.2
 
   cross-spawn@7.0.6:
     dependencies:
@@ -7870,6 +7921,8 @@ snapshots:
   lru-cache@5.1.1:
     dependencies:
       yallist: 3.1.1
+
+  luxon@3.7.2: {}
 
   lz-string@1.5.0: {}
 
