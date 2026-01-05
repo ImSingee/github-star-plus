@@ -97,26 +97,34 @@ export const githubJobs = restate.service({
         const { readmeUpdatedAtIso } = await ctx.run(
           `upsert-repo-${fullName}`,
           async () => {
-            const [dbRepo] = await db
-              .insert(schema.reposTable)
-              .values({
-                repo: fullName,
+            const [updatedRepo] = await db
+              .update(schema.reposTable)
+              .set({
                 description,
-                initialDescription: description,
                 starredAt,
+                updatedAt: sql`now()`,
+                descriptionUpdatedAt: sql`now()`,
               })
-              .onConflictDoUpdate({
-                target: schema.reposTable.repo,
-                set: {
-                  description,
-                  starredAt,
-                  updatedAt: sql`now()`,
-                  descriptionUpdatedAt: sql`now()`,
-                },
-              })
+              .where(eq(schema.reposTable.repo, fullName))
               .returning({
                 readmeUpdatedAt: schema.reposTable.readmeUpdatedAt,
               });
+
+            let dbRepo = updatedRepo;
+            if (!dbRepo) {
+              const [insertedRepo] = await db
+                .insert(schema.reposTable)
+                .values({
+                  repo: fullName,
+                  description,
+                  initialDescription: description,
+                  starredAt,
+                })
+                .returning({
+                  readmeUpdatedAt: schema.reposTable.readmeUpdatedAt,
+                });
+              dbRepo = insertedRepo;
+            }
 
             // ctx.run input/output is serialized (Date -> ISO string), so store a stable string.
             const raw = dbRepo?.readmeUpdatedAt ?? null;
