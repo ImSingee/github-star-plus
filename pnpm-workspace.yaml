@@ -1,2 +1,6 @@
 ignoredBuiltDependencies:
   - lefthook
+
+packages:
+  - 'apps/*'
+  - 'packages/*'

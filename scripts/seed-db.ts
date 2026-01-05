@@ -1,5 +1,5 @@
 import { ulid as genUlid0 } from 'ulid';
-import { db, schema } from '../src/db';
+import { db, schema } from '@proj/db';
 
 function genUlid() {
   return genUlid0().toLowerCase();

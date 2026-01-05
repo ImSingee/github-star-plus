@@ -10,7 +10,7 @@ export default defineConfig({
   dbCredentials: {
     url: DATABASE_URL,
   },
-  schema: './src/db/schema.ts',
+  schema: './src/schema.ts',
   casing: 'snake_case',
   out: './migrations',
 });

@@ -1,5 +1,5 @@
 import { definePlugin } from 'nitro';
-import { runMigrations } from '~db/migrate.ts';
+import { runMigrations } from '@proj/db/migrate';
 
 export default definePlugin(async () => {
   await runMigrations();
