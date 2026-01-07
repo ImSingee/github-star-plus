@@ -20,6 +20,9 @@ async function main() {
   void restate.serve({
     services,
     port: getPort(),
+    defaultServiceOptions: {
+      journalRetention: { days: 14 },
+    },
   });
 }
 
