@@ -51,17 +51,21 @@ export const searchRepos = createServerFn({ method: 'GET' })
       ilike(schema.reposTable.description, searchPattern),
     );
 
-    // 确定排序字段
-    const sortColumn =
-      sortBy === 'repo' ? schema.reposTable.repo : schema.reposTable.starredAt;
     const orderFn = sortOrder === 'asc' ? asc : desc;
+    const orderBy =
+      sortBy === 'repo'
+        ? [orderFn(schema.reposTable.repoName), orderFn(schema.reposTable.repo)]
+        : [
+            orderFn(schema.reposTable.starredAt),
+            orderFn(schema.reposTable.repo),
+          ];
 
     const [repos, totalResult] = await Promise.all([
       db
         .select()
         .from(schema.reposTable)
         .where(whereClause)
-        .orderBy(orderFn(sortColumn))
+        .orderBy(...orderBy)
         .limit(limit)
         .offset(offset),
       db.select({ count: count() }).from(schema.reposTable).where(whereClause),
@@ -94,16 +98,20 @@ export const getRepos = createServerFn({ method: 'GET' })
     const { db, schema } = await import('@proj/db');
     const { desc, asc, count } = await import('drizzle-orm');
 
-    // 确定排序字段
-    const sortColumn =
-      sortBy === 'repo' ? schema.reposTable.repo : schema.reposTable.starredAt;
     const orderFn = sortOrder === 'asc' ? asc : desc;
+    const orderBy =
+      sortBy === 'repo'
+        ? [orderFn(schema.reposTable.repoName), orderFn(schema.reposTable.repo)]
+        : [
+            orderFn(schema.reposTable.starredAt),
+            orderFn(schema.reposTable.repo),
+          ];
 
     const [repos, totalResult] = await Promise.all([
       db
         .select()
         .from(schema.reposTable)
-        .orderBy(orderFn(sortColumn))
+        .orderBy(...orderBy)
         .limit(limit)
         .offset(offset),
       db.select({ count: count() }).from(schema.reposTable),

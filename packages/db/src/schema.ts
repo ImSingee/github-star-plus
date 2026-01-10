@@ -47,5 +47,6 @@ export const reposTable = pgTable(
   (table) => [
     uniqueIndex('repos_repo').on(table.repo),
     index('repos_starred_at').on(table.starredAt),
+    index('repos_repo_name').on(table.repoName),
   ],
 );
