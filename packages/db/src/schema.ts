@@ -9,6 +9,7 @@ import {
   text,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
+import type { JsonObject } from 'type-fest';
 
 /** ================== utils ================== */
 function timestamp(name?: string) {
@@ -35,7 +36,7 @@ export const reposTable = pgTable(
     repo: text('repo').notNull(),
     repoId: bigint('repo_id', { mode: 'number' }),
     repoName: text('repo_name'),
-    repoDetails: jsonb('repo_details').$type<Record<string, unknown>>(),
+    repoDetails: jsonb('repo_details').$type<JsonObject>(),
     description: text('description'),
     initialDescription: text('initial_description'),
     readme: text('readme').default(''),

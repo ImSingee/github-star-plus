@@ -12,7 +12,6 @@ type StarredRepoItem = {
     name: string;
     full_name: string;
     description?: string | null;
-    [key: string]: unknown;
   };
 };
 

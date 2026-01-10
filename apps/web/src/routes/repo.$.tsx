@@ -233,9 +233,9 @@ function RepoContent({ fullName }: { fullName: string }) {
                   </Card>
                   <Card padding="md" withBorder>
                     <Text size="xs" c="dimmed" tt="uppercase" mb={4}>
-                      ID
+                      GitHub Repo ID
                     </Text>
-                    <Text fw={500}>{repo.id}</Text>
+                    <Text fw={500}>{repo.repoId ?? '—'}</Text>
                   </Card>
                   <Card padding="md" withBorder>
                     <Text size="xs" c="dimmed" tt="uppercase" mb={4}>

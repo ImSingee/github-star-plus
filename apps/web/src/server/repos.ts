@@ -1,9 +1,13 @@
 import { createServerFn } from '@tanstack/react-start';
+import type { JsonObject } from 'type-fest';
 
 // 类型定义（这些可以安全地在客户端导入）
 export interface RepoItem {
   id: number;
   repo: string;
+  repoId: number | null;
+  repoName: string | null;
+  repoDetails: JsonObject | null;
   description: string | null;
   initialDescription: string | null;
   readme: string | null;
