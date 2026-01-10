@@ -210,7 +210,7 @@ export function SearchHero() {
                           <UnstyledButton
                             w="100%"
                             p="md"
-                            onClick={() => handleSearch(query)}
+                            onClick={() => handleSearch(debouncedQuery)}
                             styles={{
                               root: {
                                 '&:hover': {
@@ -226,7 +226,7 @@ export function SearchHero() {
                                 stroke={1.5}
                               />
                               <Text size="sm" c="blue.4">
-                                View all results for "{query}" (
+                                View all results for "{debouncedQuery}" (
                                 {searchResults.total} found)
                               </Text>
                             </Flex>
