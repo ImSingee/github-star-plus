@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm';
 import {
   timestamp as _timestamp,
   bigint,
+  customType,
   index,
   jsonb,
   pgTable,
@@ -30,6 +31,13 @@ const updatedAt = timestamp('updated_at')
 // const RESTRICT = { onUpdate: "restrict", onDelete: "restrict" } as const;
 // const CASCADE = { onUpdate: "cascade", onDelete: "cascade" } as const;
 
+/** Custom tsvector type for full-text search */
+const tsvector = customType<{ data: string }>({
+  dataType() {
+    return 'tsvector';
+  },
+});
+
 export const reposTable = pgTable(
   'repos',
   {
@@ -50,6 +58,14 @@ export const reposTable = pgTable(
       (): SQL =>
         sql`nullif(${reposTable.repoDetails} -> 'owner' ->> 'avatar_url', '')`,
     ),
+    /** Full-text search vector: weighted combination of repo names (A), descriptions (B), readmes (C) */
+    searchVector: tsvector('search_vector').generatedAlwaysAs(
+      (): SQL => sql`(
+        setweight(to_tsvector('english', coalesce(${reposTable.repo}, '') || ' ' || coalesce(${reposTable.initialRepo}, '')), 'A') ||
+        setweight(to_tsvector('english', coalesce(${reposTable.description}, '') || ' ' || coalesce(${reposTable.initialDescription}, '')), 'B') ||
+        setweight(to_tsvector('english', coalesce(${reposTable.readme}, '') || ' ' || coalesce(${reposTable.initialReadme}, '')), 'C')
+      )`,
+    ),
     createdAt,
     updatedAt,
   },
@@ -58,5 +74,6 @@ export const reposTable = pgTable(
     uniqueIndex('repos_repo_id').on(table.repoId),
     index('repos_starred_at').on(table.starredAt),
     index('repos_repo_name').on(table.repoName),
+    index('repos_search_fts').using('gin', table.searchVector),
   ],
 );

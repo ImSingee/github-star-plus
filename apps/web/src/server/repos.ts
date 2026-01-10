@@ -11,7 +11,7 @@ export type RepoListItem = Pick<
   'id' | 'repo' | 'repoId' | 'description' | 'starredAt' | 'ownerAvatarUrl'
 >;
 
-export type SortField = 'starredAt' | 'repo';
+export type SortField = 'starredAt' | 'repo' | 'rank';
 export type SortOrder = 'asc' | 'desc';
 
 type OrderByExpr = AnyColumn | SQL;
@@ -19,7 +19,7 @@ type SqlTag = (strings: TemplateStringsArray, ...expr: Array<unknown>) => SQL;
 type OrderFn = (column: SQLWrapper | AnyColumn) => SQL;
 
 function buildOrderBy(args: {
-  sortBy: SortField;
+  sortBy: Exclude<SortField, 'rank'>;
   sortOrder: SortOrder;
   schema: typeof schema;
   asc: OrderFn;
@@ -72,23 +72,46 @@ export const getRepos = createServerFn({ method: 'GET' })
 
     // Dynamic import for server-side modules
     const { db, schema } = await import('@proj/db');
-    const { count, desc, asc, ilike, or, sql } = await import('drizzle-orm');
+    const { count, desc, asc, sql } = await import('drizzle-orm');
 
-    const whereClause = shouldSearch
-      ? or(
-          // repo full_name
-          ilike(schema.reposTable.repo, `%${trimmedQuery}%`),
-          ilike(schema.reposTable.initialRepo, `%${trimmedQuery}%`),
-          // descriptions
-          ilike(schema.reposTable.description, `%${trimmedQuery}%`),
-          ilike(schema.reposTable.initialDescription, `%${trimmedQuery}%`),
-          // readmes
-          ilike(schema.reposTable.readme, `%${trimmedQuery}%`),
-          ilike(schema.reposTable.initialReadme, `%${trimmedQuery}%`),
-        )
-      : undefined;
+    // Build where clause using FTS when searching
+    let whereClause: SQL | undefined;
+    let rankExpr: SQL | undefined;
 
-    const orderBy = buildOrderBy({ sortBy, sortOrder, schema, asc, desc, sql });
+    if (shouldSearch) {
+      // Use websearch_to_tsquery for web-style query parsing (supports AND, OR, quotes, negation)
+      const tsQuery = sql`websearch_to_tsquery('english', ${trimmedQuery})`;
+      whereClause = sql`${schema.reposTable.searchVector} @@ ${tsQuery}`;
+      rankExpr = sql`ts_rank_cd(${schema.reposTable.searchVector}, ${tsQuery})`;
+    }
+
+    // Build order by clause
+    let orderBy: Array<OrderByExpr>;
+
+    if (shouldSearch && rankExpr) {
+      // When searching, rank is always the primary sort
+      const secondarySortBy = sortBy === 'rank' ? 'starredAt' : sortBy;
+      const secondaryOrderBy = buildOrderBy({
+        sortBy: secondarySortBy,
+        sortOrder,
+        schema,
+        asc,
+        desc,
+        sql,
+      });
+      orderBy = [desc(rankExpr), ...secondaryOrderBy];
+    } else {
+      // No search: use the requested sort field
+      const effectiveSortBy = sortBy === 'rank' ? 'starredAt' : sortBy;
+      orderBy = buildOrderBy({
+        sortBy: effectiveSortBy,
+        sortOrder,
+        schema,
+        asc,
+        desc,
+        sql,
+      });
+    }
 
     // Select only fields needed for list view, avoiding large fields like readme/repoDetails
     const listBase = db

@@ -48,7 +48,9 @@ const SORT_OPTIONS: Array<{
   field: SortField;
   order: SortOrder;
   label: string;
+  searchOnly?: boolean;
 }> = [
+  { field: 'rank', order: 'desc', label: 'Relevance', searchOnly: true },
   { field: 'starredAt', order: 'desc', label: 'Starred (Newest)' },
   { field: 'starredAt', order: 'asc', label: 'Starred (Oldest)' },
   { field: 'repo', order: 'asc', label: 'Name (A-Z)' },
@@ -61,9 +63,12 @@ function ReposPage() {
   const [localQuery, setLocalQuery] = useState(searchQuery || '');
   const [debouncedQuery] = useDebouncedValue(localQuery, 300);
   const [layout, setLayout] = useState<'grid' | 'list'>('grid');
-  const [sortBy, setSortBy] = useState<SortField>('starredAt');
+  const [sortBy, setSortBy] = useState<SortField>(
+    searchQuery ? 'rank' : 'starredAt',
+  );
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const isInitialMount = useRef(true);
+  const prevSearchQuery = useRef(searchQuery);
 
   const { ref: loadMoreRef, entry } = useIntersection({
     threshold: 0.1,
@@ -133,6 +138,29 @@ function ReposPage() {
     }
   }, [debouncedQuery, navigate, searchQuery]);
 
+  // Auto-reset to Relevance (rank desc) when search query changes
+  useEffect(() => {
+    const prev = prevSearchQuery.current;
+    const current = searchQuery;
+    prevSearchQuery.current = current;
+
+    // Skip on initial mount (already handled in useState)
+    if (prev === undefined && current === undefined) return;
+
+    // When search query changes (including from empty to non-empty)
+    if (current !== prev) {
+      if (current) {
+        // Has search query: switch to Relevance (rank desc)
+        setSortBy('rank');
+        setSortOrder('desc');
+      } else {
+        // Search query cleared: switch back to Starred (Newest)
+        setSortBy('starredAt');
+        setSortOrder('desc');
+      }
+    }
+  }, [searchQuery]);
+
   const handleClear = () => {
     setLocalQuery('');
   };
@@ -141,6 +169,11 @@ function ReposPage() {
     setSortBy(field);
     setSortOrder(order);
   };
+
+  // Filter out searchOnly options when not searching
+  const availableSortOptions = searchQuery
+    ? SORT_OPTIONS
+    : SORT_OPTIONS.filter((o) => !o.searchOnly);
 
   const currentSortLabel =
     SORT_OPTIONS.find((o) => o.field === sortBy && o.order === sortOrder)
@@ -204,7 +237,7 @@ function ReposPage() {
                 </Button>
               </Menu.Target>
               <Menu.Dropdown>
-                {SORT_OPTIONS.map((option) => (
+                {availableSortOptions.map((option) => (
                   <Menu.Item
                     key={`${option.field}-${option.order}`}
                     onClick={() => handleSortChange(option.field, option.order)}
