@@ -7,14 +7,21 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import { ReactQueryDevtoolsPanel } from '@tanstack/react-query-devtools';
 import { TanStackDevtools } from '@tanstack/react-devtools';
 import { MantineProvider } from '@mantine/core';
+import {
+  CodeHighlightAdapterProvider,
+  createHighlightJsAdapter,
+} from '@mantine/code-highlight';
 import { Toaster } from 'sonner';
 import { NavigationProgress } from '@mantine/nprogress';
 import { ModalsProvider } from '@mantine/modals';
+import hljs from 'highlight.js';
 import type { QueryClient } from '@tanstack/react-query';
 import appCss from '~styles.css?url';
 import { shadcnTheme as theme } from '~ui/shadcn-blue-theme/theme';
 import { shadcnCssVariableResolver as cssVariablesResolver } from '~ui/shadcn-blue-theme/cssVariableResolver';
 import { AppLayout } from '~components/layout/AppLayout';
+
+const codeHighlightAdapter = createHighlightJsAdapter(hljs);
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -55,7 +62,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           theme={theme}
           cssVariablesResolver={cssVariablesResolver}
         >
-          <ModalsProvider>{children}</ModalsProvider>
+          <CodeHighlightAdapterProvider adapter={codeHighlightAdapter}>
+            <ModalsProvider>{children}</ModalsProvider>
+          </CodeHighlightAdapterProvider>
 
           <Toaster position="top-center" richColors />
           <NavigationProgress />

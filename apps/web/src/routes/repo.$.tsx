@@ -8,7 +8,6 @@ import {
   Button,
   Card,
   Center,
-  Code,
   Container,
   Flex,
   Group,
@@ -32,6 +31,7 @@ import dayjs from 'dayjs';
 import copy from 'copy-to-clipboard';
 import { toast } from 'sonner';
 import { getRepoByName } from '~server/repos';
+import { RepoReadmeMarkdown } from '~components/repos/RepoReadmeMarkdown';
 
 const repoQueryOptions = (fullName: string) =>
   queryOptions({
@@ -194,17 +194,13 @@ function RepoContent({ fullName }: { fullName: string }) {
           <Tabs.Panel value="readme" pt="md">
             <Card padding="xl" withBorder>
               {repo.readme ? (
-                <Code
-                  block
-                  style={{
-                    whiteSpace: 'pre-wrap',
-                    wordBreak: 'break-word',
-                    maxHeight: 600,
-                    overflow: 'auto',
-                  }}
-                >
-                  {repo.readme}
-                </Code>
+                <Box style={{ maxHeight: 600, overflow: 'auto' }}>
+                  <RepoReadmeMarkdown
+                    markdown={repo.readme}
+                    repoFullName={repo.repo}
+                    repoDetails={repo.repoDetails}
+                  />
+                </Box>
               ) : (
                 <Center py="xl">
                   <Text c="dimmed" fs="italic">
