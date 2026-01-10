@@ -1,23 +1,8 @@
 import { createServerFn } from '@tanstack/react-start';
-import type { JsonObject } from 'type-fest';
+import type { schema } from '@proj/db';
 
-// 类型定义（这些可以安全地在客户端导入）
-export interface RepoItem {
-  id: number;
-  repo: string;
-  repoId: number | null;
-  repoName: string | null;
-  repoDetails: JsonObject | null;
-  description: string | null;
-  initialDescription: string | null;
-  readme: string | null;
-  initialReadme: string | null;
-  starredAt: Date | null;
-  descriptionUpdatedAt: Date | null;
-  readmeUpdatedAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
-}
+// 类型定义（直接从 Drizzle schema 推断）
+export type RepoItem = typeof schema.reposTable.$inferSelect;
 
 export type SortField = 'starredAt' | 'repo';
 export type SortOrder = 'asc' | 'desc';
