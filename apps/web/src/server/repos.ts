@@ -77,6 +77,7 @@ export const getRepos = createServerFn({ method: 'GET' })
     // Build where clause using FTS + ilike fallback when searching
     let whereClause: SQL | undefined;
     let rankExpr: SQL | undefined;
+    let fieldPriorityExpr: SQL | undefined;
 
     if (shouldSearch) {
       // Use websearch_to_tsquery for web-style query parsing (supports AND, OR, quotes, negation)
@@ -99,13 +100,22 @@ export const getRepos = createServerFn({ method: 'GET' })
 
       // Rank: only FTS matches get a rank score, ilike-only matches get 0
       rankExpr = sql`CASE WHEN ${ftsMatch} THEN ts_rank_cd(${schema.reposTable.searchVector}, ${tsQuery}) ELSE 0 END`;
+
+      // Field priority: repo(3) > description(2) > readme(1)
+      // Use GREATEST to get the highest priority among matched fields
+      fieldPriorityExpr = sql`GREATEST(
+        CASE WHEN ${schema.reposTable.repo} ILIKE ${ilikePattern} OR ${schema.reposTable.initialRepo} ILIKE ${ilikePattern} THEN 3 ELSE 0 END,
+        CASE WHEN ${schema.reposTable.description} ILIKE ${ilikePattern} OR ${schema.reposTable.initialDescription} ILIKE ${ilikePattern} THEN 2 ELSE 0 END,
+        CASE WHEN ${schema.reposTable.readme} ILIKE ${ilikePattern} OR ${schema.reposTable.initialReadme} ILIKE ${ilikePattern} THEN 1 ELSE 0 END
+      )`;
     }
 
     // Build order by clause
     let orderBy: Array<OrderByExpr>;
 
-    if (shouldSearch && rankExpr) {
-      // When searching, rank is always the primary sort
+    if (shouldSearch && rankExpr && fieldPriorityExpr) {
+      // When searching: rank DESC, field priority DESC, then secondary sort
+      // This ensures: FTS relevance first, then repo > description > readme
       const secondarySortBy = sortBy === 'rank' ? 'starredAt' : sortBy;
       const secondaryOrderBy = buildOrderBy({
         sortBy: secondarySortBy,
@@ -115,7 +125,7 @@ export const getRepos = createServerFn({ method: 'GET' })
         desc,
         sql,
       });
-      orderBy = [desc(rankExpr), ...secondaryOrderBy];
+      orderBy = [desc(rankExpr), desc(fieldPriorityExpr), ...secondaryOrderBy];
     } else {
       // No search: use the requested sort field
       const effectiveSortBy = sortBy === 'rank' ? 'starredAt' : sortBy;
