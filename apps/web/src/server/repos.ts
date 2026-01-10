@@ -76,8 +76,15 @@ export const getRepos = createServerFn({ method: 'GET' })
 
     const whereClause = shouldSearch
       ? or(
+          // repo full_name
           ilike(schema.reposTable.repo, `%${trimmedQuery}%`),
+          ilike(schema.reposTable.initialRepo, `%${trimmedQuery}%`),
+          // descriptions
           ilike(schema.reposTable.description, `%${trimmedQuery}%`),
+          ilike(schema.reposTable.initialDescription, `%${trimmedQuery}%`),
+          // readmes
+          ilike(schema.reposTable.readme, `%${trimmedQuery}%`),
+          ilike(schema.reposTable.initialReadme, `%${trimmedQuery}%`),
         )
       : undefined;
 

@@ -279,13 +279,22 @@ function ReposPage() {
             {layout === 'list' ? (
               <Stack gap="sm">
                 {repos.map((repo) => (
-                  <RepoCard key={repo.id} repo={repo} variant="list" />
+                  <RepoCard
+                    key={repo.id}
+                    repo={repo}
+                    variant="list"
+                    searchQuery={searchQuery}
+                  />
                 ))}
               </Stack>
             ) : (
               <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
                 {repos.map((repo) => (
-                  <RepoCard key={repo.id} repo={repo} />
+                  <RepoCard
+                    key={repo.id}
+                    repo={repo}
+                    searchQuery={searchQuery}
+                  />
                 ))}
               </SimpleGrid>
             )}

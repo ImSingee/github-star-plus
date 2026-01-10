@@ -1,15 +1,90 @@
-import { Anchor, Avatar, Box, Card, Flex, Group, Text } from '@mantine/core';
+import {
+  Anchor,
+  Avatar,
+  Box,
+  Card,
+  Flex,
+  Group,
+  Mark,
+  Text,
+} from '@mantine/core';
 import { IconExternalLink, IconStar } from '@tabler/icons-react';
 import dayjs from 'dayjs';
+import type { ReactNode } from 'react';
 import type { RepoListItem } from '~server/repos';
 
 interface RepoCardProps {
   repo: RepoListItem;
   variant?: 'grid' | 'list';
+  searchQuery?: string;
 }
 
-export function RepoCard({ repo, variant = 'grid' }: RepoCardProps) {
+/**
+ * Extracts keywords from search query for highlighting.
+ * - Splits by whitespace
+ * - Removes "-" prefixed exclusion terms
+ * - Removes quotes from phrases
+ * - Returns unique non-empty keywords
+ */
+function extractKeywords(query: string): Array<string> {
+  if (!query.trim()) return [];
+
+  const words = query
+    .split(/\s+/)
+    .filter((w) => w && !w.startsWith('-')) // ignore exclusion terms
+    .map((w) => w.replace(/^["']|["']$/g, '')) // remove surrounding quotes
+    .filter((w) => w.length > 0);
+
+  return [...new Set(words)];
+}
+
+/**
+ * Highlights keywords in text by wrapping matches with <Mark>.
+ * Case-insensitive matching.
+ */
+function highlightText(text: string, keywords: Array<string>): ReactNode {
+  if (!keywords.length || !text) return text;
+
+  // Build regex pattern matching any keyword (case-insensitive)
+  const escapedKeywords = keywords.map((k) =>
+    k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'),
+  );
+  const pattern = new RegExp(`(${escapedKeywords.join('|')})`, 'gi');
+
+  const parts = text.split(pattern);
+
+  return parts.map((part, i) => {
+    // Check if this part matches any keyword (case-insensitive)
+    const isMatch = keywords.some(
+      (kw) => part.toLowerCase() === kw.toLowerCase(),
+    );
+    if (isMatch) {
+      return (
+        <Mark key={i} color="yellow">
+          {part}
+        </Mark>
+      );
+    }
+    return part;
+  });
+}
+
+export function RepoCard({
+  repo,
+  variant = 'grid',
+  searchQuery,
+}: RepoCardProps) {
   const [owner, repoName] = repo.repo.split('/');
+  const keywords = searchQuery ? extractKeywords(searchQuery) : [];
+
+  // Apply highlight to displayed text
+  const displayRepoName = keywords.length
+    ? highlightText(repoName, keywords)
+    : repoName;
+  const displayOwner = keywords.length ? highlightText(owner, keywords) : owner;
+  const displayDescription = keywords.length
+    ? highlightText(repo.description || 'No description', keywords)
+    : repo.description || 'No description';
 
   if (variant === 'list') {
     return (
@@ -39,15 +114,15 @@ export function RepoCard({ repo, variant = 'grid' }: RepoCardProps) {
             />
 
             <Text fw={600} size="sm" w={180} style={{ flexShrink: 0 }} truncate>
-              {repoName}
+              {displayRepoName}
             </Text>
 
             <Text size="xs" c="dimmed" w={120} style={{ flexShrink: 0 }}>
-              {owner}
+              {displayOwner}
             </Text>
 
             <Text size="xs" c="dimmed" flex={1} truncate miw={0}>
-              {repo.description || 'No description'}
+              {displayDescription}
             </Text>
 
             {repo.starredAt && (
@@ -112,10 +187,10 @@ export function RepoCard({ repo, variant = 'grid' }: RepoCardProps) {
           <Avatar src={repo.ownerAvatarUrl} alt={owner} size="md" radius="sm" />
           <Box flex={1} miw={0}>
             <Text fw={600} size="md" truncate>
-              {repoName}
+              {displayRepoName}
             </Text>
             <Text size="sm" c="dimmed">
-              {owner}
+              {displayOwner}
             </Text>
           </Box>
         </Flex>
@@ -129,7 +204,7 @@ export function RepoCard({ repo, variant = 'grid' }: RepoCardProps) {
           lineClamp={3}
           style={{ wordBreak: 'break-word' }}
         >
-          {repo.description || 'No description'}
+          {displayDescription}
         </Text>
 
         <Group
