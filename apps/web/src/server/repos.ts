@@ -72,17 +72,33 @@ export const getRepos = createServerFn({ method: 'GET' })
 
     // Dynamic import for server-side modules
     const { db, schema } = await import('@proj/db');
-    const { count, desc, asc, sql } = await import('drizzle-orm');
+    const { count, desc, asc, sql, ilike, or } = await import('drizzle-orm');
 
-    // Build where clause using FTS when searching
+    // Build where clause using FTS + ilike fallback when searching
     let whereClause: SQL | undefined;
     let rankExpr: SQL | undefined;
 
     if (shouldSearch) {
       // Use websearch_to_tsquery for web-style query parsing (supports AND, OR, quotes, negation)
       const tsQuery = sql`websearch_to_tsquery('english', ${trimmedQuery})`;
-      whereClause = sql`${schema.reposTable.searchVector} @@ ${tsQuery}`;
-      rankExpr = sql`ts_rank_cd(${schema.reposTable.searchVector}, ${tsQuery})`;
+      const ftsMatch = sql`${schema.reposTable.searchVector} @@ ${tsQuery}`;
+
+      // ilike fallback for same 6 fields (handles cases FTS might miss)
+      const ilikePattern = `%${trimmedQuery}%`;
+      const ilikeMatch = or(
+        ilike(schema.reposTable.repo, ilikePattern),
+        ilike(schema.reposTable.initialRepo, ilikePattern),
+        ilike(schema.reposTable.description, ilikePattern),
+        ilike(schema.reposTable.initialDescription, ilikePattern),
+        ilike(schema.reposTable.readme, ilikePattern),
+        ilike(schema.reposTable.initialReadme, ilikePattern),
+      );
+
+      // Combined: FTS match OR ilike match
+      whereClause = sql`(${ftsMatch} OR ${ilikeMatch})`;
+
+      // Rank: only FTS matches get a rank score, ilike-only matches get 0
+      rankExpr = sql`CASE WHEN ${ftsMatch} THEN ts_rank_cd(${schema.reposTable.searchVector}, ${tsQuery}) ELSE 0 END`;
     }
 
     // Build order by clause
