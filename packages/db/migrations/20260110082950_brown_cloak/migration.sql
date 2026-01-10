@@ -1,0 +1,1 @@
+ALTER TABLE "repos" ADD COLUMN "owner_avatar_url" text GENERATED ALWAYS AS (nullif("repos"."repo_details" -> 'owner' ->> 'avatar_url', '')) STORED;

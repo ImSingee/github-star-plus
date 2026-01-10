@@ -9,6 +9,7 @@ import {
   text,
   uniqueIndex,
 } from 'drizzle-orm/pg-core';
+import type { SQL } from 'drizzle-orm';
 import type { JsonObject } from 'type-fest';
 
 /** ================== utils ================== */
@@ -45,6 +46,10 @@ export const reposTable = pgTable(
     starredAt: timestamp('starred_at').notNull(),
     descriptionUpdatedAt: timestamp('description_updated_at').notNull(),
     readmeUpdatedAt: timestamp('readme_updated_at'),
+    ownerAvatarUrl: text('owner_avatar_url').generatedAlwaysAs(
+      (): SQL =>
+        sql`nullif(${reposTable.repoDetails} -> 'owner' ->> 'avatar_url', '')`,
+    ),
     createdAt,
     updatedAt,
   },

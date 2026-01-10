@@ -1,0 +1,318 @@
+{
+  "version": "8",
+  "dialect": "postgres",
+  "id": "635ea241-a8e1-48ca-8427-1f5735e3f9ab",
+  "prevIds": ["a1192fc9-4697-4781-b3aa-54103c94b6a5"],
+  "ddl": [
+    {
+      "isRlsEnabled": false,
+      "name": "repos",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "type": "serial",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "repos"
+    },
+    {
+      "type": "bigint",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "repo_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "repos"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "repo",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "repos"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "initial_repo",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "repos"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "repo_name",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "repos"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "repo_details",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "repos"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "description",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "repos"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "initial_description",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "repos"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": "''",
+      "generated": null,
+      "identity": null,
+      "name": "readme",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "repos"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "initial_readme",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "repos"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "starred_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "repos"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "description_updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "repos"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "readme_updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "repos"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": {
+        "as": "nullif(\"repos\".\"repo_details\" -> 'owner' ->> 'avatar_url', '')",
+        "type": "stored"
+      },
+      "identity": null,
+      "name": "owner_avatar_url",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "repos"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "repos"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "repos"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "repo",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "repos_repo",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "repos"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "repo_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "repos_repo_id",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "repos"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "starred_at",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "repos_starred_at",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "repos"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "repo_name",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "repos_repo_name",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "repos"
+    },
+    {
+      "columns": ["id"],
+      "nameExplicit": false,
+      "name": "repos_pkey",
+      "schema": "public",
+      "table": "repos",
+      "entityType": "pks"
+    }
+  ],
+  "renames": []
+}
