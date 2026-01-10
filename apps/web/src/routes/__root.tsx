@@ -14,6 +14,7 @@ import type { QueryClient } from '@tanstack/react-query';
 import appCss from '~styles.css?url';
 import { shadcnTheme as theme } from '~ui/shadcn-blue-theme/theme';
 import { shadcnCssVariableResolver as cssVariablesResolver } from '~ui/shadcn-blue-theme/cssVariableResolver';
+import { AppLayout } from '~components/layout/AppLayout';
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -28,7 +29,7 @@ export const Route = createRootRouteWithContext<{
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'TanStack Start Starter',
+        title: 'GitHub Star Plus',
       },
     ],
     links: [
@@ -40,6 +41,7 @@ export const Route = createRootRouteWithContext<{
   }),
 
   shellComponent: RootDocument,
+  component: AppLayout,
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {

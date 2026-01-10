@@ -823,7 +823,7 @@ export const shadcnTheme: MantineThemeOverride = createTheme({
     Card: Card.extend({
       defaultProps: {
         p: 'xl',
-        shadow: 'xl',
+        shadow: 'xs',
         withBorder: true,
       },
       styles: (theme) => {

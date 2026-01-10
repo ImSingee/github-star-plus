@@ -1,6 +1,7 @@
 import { sql } from 'drizzle-orm';
 import {
   timestamp as _timestamp,
+  index,
   pgTable,
   serial,
   text,
@@ -40,5 +41,8 @@ export const reposTable = pgTable(
     createdAt,
     updatedAt,
   },
-  (table) => [uniqueIndex('repos_repo').on(table.repo)],
+  (table) => [
+    uniqueIndex('repos_repo').on(table.repo),
+    index('repos_starred_at').on(table.starredAt),
+  ],
 );
