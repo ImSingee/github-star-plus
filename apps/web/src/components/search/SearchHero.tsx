@@ -86,165 +86,181 @@ export function SearchHero() {
   }, []);
 
   return (
-    <Box
-      style={{
-        minHeight: '100vh',
-        background:
-          'linear-gradient(135deg, var(--mantine-color-slate-9) 0%, var(--mantine-color-slate-8) 50%, var(--mantine-color-blue-9) 100%)',
-      }}
-    >
-      <Container size="md" py="4xl">
-        <Center mih="calc(100vh - 80px)">
-          <Stack align="center" gap="xl" w="100%">
-            <IconBrandGithub size={72} stroke={1.5} color="white" />
+    <Box pos="relative" style={{ minHeight: '100vh' }}>
+      <Box
+        pos="fixed"
+        top={0}
+        left={0}
+        right={0}
+        bottom={0}
+        style={{
+          background:
+            'linear-gradient(135deg, var(--mantine-color-slate-9) 0%, var(--mantine-color-slate-8) 50%, var(--mantine-color-blue-9) 100%)',
+          pointerEvents: 'none',
+          zIndex: 0,
+        }}
+      />
 
-            <Title order={1} c="white" ta="center" fz={{ base: 32, md: 48 }}>
-              GitHub Star Plus
-            </Title>
+      <Box pos="relative" style={{ zIndex: 1 }}>
+        <Container size="md" py="4xl">
+          <Center mih="calc(100vh - 80px)">
+            <Stack align="center" gap="xl" w="100%">
+              <IconBrandGithub size={72} stroke={1.5} color="white" />
 
-            <Text c="slate.4" ta="center" size="lg" maw={500}>
-              Search and manage your starred GitHub repositories, discover more
-              amazing projects
-            </Text>
+              <Title order={1} c="white" ta="center" fz={{ base: 32, md: 48 }}>
+                GitHub Star Plus
+              </Title>
 
-            <Box w="100%" maw={600} ref={containerRef} pos="relative">
-              <TextInput
-                placeholder="Search repositories by name or description..."
-                value={query}
-                onChange={(e) => {
-                  setQuery(e.currentTarget.value);
-                  setShowResults(true);
-                }}
-                onFocus={() => setShowResults(true)}
-                onKeyDown={handleKeyDown}
-                leftSection={<IconSearch size={20} />}
-                rightSection={isSearching ? <Loader size="xs" /> : null}
-                size="lg"
-                styles={{
-                  input: {
-                    height: 56,
-                    background: 'rgba(255, 255, 255, 0.08)',
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
-                    color: 'white',
-                    '&::placeholder': {
-                      color: 'var(--mantine-color-slate-5)',
-                    },
-                    '&:focus': {
-                      background: 'rgba(255, 255, 255, 0.1)',
-                      borderColor: 'var(--mantine-color-blue-5)',
-                    },
-                  },
-                }}
-              />
+              <Text c="slate.4" ta="center" size="lg" maw={500}>
+                Search and manage your starred GitHub repositories, discover
+                more amazing projects
+              </Text>
 
-              {showResults && debouncedQuery && (
-                <Paper
-                  pos="absolute"
-                  top="100%"
-                  left={0}
-                  right={0}
-                  mt="xs"
-                  bg="slate.8"
-                  radius="md"
-                  shadow="xl"
-                  style={{
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    maxHeight: 400,
-                    overflowY: 'auto',
-                    zIndex: 100,
+              <Box w="100%" maw={600} ref={containerRef} pos="relative">
+                <TextInput
+                  placeholder="Search repositories by name or description..."
+                  value={query}
+                  onChange={(e) => {
+                    setQuery(e.currentTarget.value);
+                    setShowResults(true);
                   }}
-                >
-                  {searchResults?.repos && searchResults.repos.length > 0 ? (
-                    <>
-                      {searchResults.repos.map((repo) => (
-                        <UnstyledButton
-                          key={repo.id}
-                          w="100%"
-                          p="md"
-                          onClick={() => handleResultClick(repo)}
-                          style={{
-                            borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-                          }}
-                          styles={{
-                            root: {
-                              '&:hover': {
-                                background: 'rgba(255, 255, 255, 0.05)',
-                              },
-                            },
-                          }}
-                        >
-                          <Flex gap="md" align="flex-start">
-                            <Avatar
-                              src={repo.ownerAvatarUrl}
-                              alt={repo.repo.split('/')[0]}
-                              size="sm"
-                              radius="sm"
-                            />
-                            <Box flex={1} miw={0}>
-                              <Text fw={600} c="white" truncate>
-                                {repo.repo}
-                              </Text>
-                              {repo.description && (
-                                <Text size="sm" c="slate.4" truncate>
-                                  {repo.description}
-                                </Text>
-                              )}
-                            </Box>
-                          </Flex>
-                        </UnstyledButton>
-                      ))}
-                      <UnstyledButton
-                        w="100%"
-                        p="md"
-                        onClick={() => handleSearch(query)}
-                        styles={{
-                          root: {
-                            '&:hover': {
-                              background: 'rgba(255, 255, 255, 0.05)',
-                            },
-                          },
-                        }}
-                      >
-                        <Flex gap="md" align="center">
-                          <IconSearch
-                            size={20}
-                            color="var(--mantine-color-slate-5)"
-                            stroke={1.5}
-                          />
-                          <Text size="sm" c="blue.4">
-                            View all results for "{query}" (
-                            {searchResults.total} found)
-                          </Text>
-                        </Flex>
-                      </UnstyledButton>
-                    </>
-                  ) : !isSearching ? (
-                    <Center p="xl">
-                      <Text size="sm" c="slate.4">
-                        No matching repositories found
-                      </Text>
-                    </Center>
-                  ) : null}
-                </Paper>
-              )}
-            </Box>
+                  onFocus={() => setShowResults(true)}
+                  onKeyDown={handleKeyDown}
+                  leftSection={<IconSearch size={20} />}
+                  rightSection={isSearching ? <Loader size="xs" /> : null}
+                  size="lg"
+                  styles={{
+                    input: {
+                      height: 56,
+                      background: 'rgba(255, 255, 255, 0.08)',
+                      border: '1px solid rgba(255, 255, 255, 0.12)',
+                      color: 'white',
+                      '&::placeholder': {
+                        color: 'var(--mantine-color-slate-5)',
+                      },
+                      '&:focus': {
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        borderColor: 'var(--mantine-color-blue-5)',
+                      },
+                    },
+                  }}
+                />
 
-            <Anchor
-              component={Link}
-              to="/repos"
-              c="slate.4"
-              size="lg"
-              mt="xl"
-              underline="hover"
-            >
-              <Flex align="center" gap={6}>
-                Browse all {totalCount?.toLocaleString() ?? '—'} repositories
-                <IconArrowRight size={18} />
-              </Flex>
-            </Anchor>
-          </Stack>
-        </Center>
-      </Container>
+                {showResults && debouncedQuery && (
+                  <Box
+                    pos="absolute"
+                    top="100%"
+                    left={0}
+                    right={0}
+                    pb="sm"
+                    mt="xs"
+                    style={{ zIndex: 100 }}
+                  >
+                    <Paper
+                      bg="slate.8"
+                      radius="md"
+                      shadow="xl"
+                      style={{
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        maxHeight: 400,
+                        overflowY: 'auto',
+                      }}
+                    >
+                      {searchResults?.repos &&
+                      searchResults.repos.length > 0 ? (
+                        <>
+                          {searchResults.repos.map((repo) => (
+                            <UnstyledButton
+                              key={repo.id}
+                              w="100%"
+                              p="md"
+                              onClick={() => handleResultClick(repo)}
+                              style={{
+                                borderBottom:
+                                  '1px solid rgba(255, 255, 255, 0.05)',
+                              }}
+                              styles={{
+                                root: {
+                                  '&:hover': {
+                                    background: 'rgba(255, 255, 255, 0.05)',
+                                  },
+                                },
+                              }}
+                            >
+                              <Flex gap="md" align="flex-start">
+                                <Avatar
+                                  src={repo.ownerAvatarUrl}
+                                  alt={repo.repo.split('/')[0]}
+                                  size="sm"
+                                  radius="sm"
+                                />
+                                <Box flex={1} miw={0}>
+                                  <Text fw={600} c="white" truncate>
+                                    {repo.repo}
+                                  </Text>
+                                  {repo.description && (
+                                    <Text size="sm" c="slate.4" truncate>
+                                      {repo.description}
+                                    </Text>
+                                  )}
+                                </Box>
+                              </Flex>
+                            </UnstyledButton>
+                          ))}
+                          <UnstyledButton
+                            w="100%"
+                            p="md"
+                            onClick={() => handleSearch(query)}
+                            styles={{
+                              root: {
+                                '&:hover': {
+                                  background: 'rgba(255, 255, 255, 0.05)',
+                                },
+                              },
+                            }}
+                          >
+                            <Flex gap="md" align="center">
+                              <IconSearch
+                                size={20}
+                                color="var(--mantine-color-slate-5)"
+                                stroke={1.5}
+                              />
+                              <Text size="sm" c="blue.4">
+                                View all results for "{query}" (
+                                {searchResults.total} found)
+                              </Text>
+                            </Flex>
+                          </UnstyledButton>
+                        </>
+                      ) : !isSearching ? (
+                        <Center p="xl">
+                          <Text size="sm" c="slate.4">
+                            No matching repositories found
+                          </Text>
+                        </Center>
+                      ) : null}
+                    </Paper>
+                  </Box>
+                )}
+              </Box>
+
+              <Anchor
+                component={Link}
+                to="/repos"
+                c="slate.4"
+                size="lg"
+                mt="xl"
+                underline="hover"
+              >
+                <Flex align="center" gap={6}>
+                  Browse all {totalCount?.toLocaleString() ?? '—'} repositories
+                  <IconArrowRight size={18} />
+                </Flex>
+              </Anchor>
+            </Stack>
+          </Center>
+        </Container>
+      </Box>
     </Box>
   );
 }
