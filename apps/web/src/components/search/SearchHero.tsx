@@ -17,7 +17,7 @@ import {
 import { useDebouncedValue } from '@mantine/hooks';
 import { useQuery } from '@tanstack/react-query';
 import { IconArrowRight, IconBook, IconSearch } from '@tabler/icons-react';
-import type { RepoItem } from '~server/repos';
+import type { RepoListItem } from '~server/repos';
 import { getRepos, getReposCount } from '~server/repos';
 
 export function SearchHero() {
@@ -61,7 +61,7 @@ export function SearchHero() {
     }
   };
 
-  const handleResultClick = (repo: RepoItem) => {
+  const handleResultClick = (repo: RepoListItem) => {
     setShowResults(false);
     navigate({ to: `/repo/${repo.repo}` });
   };

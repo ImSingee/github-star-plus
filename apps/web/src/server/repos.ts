@@ -2,8 +2,14 @@ import { createServerFn } from '@tanstack/react-start';
 import type { schema } from '@proj/db';
 import type { AnyColumn, SQL, SQLWrapper } from 'drizzle-orm';
 
-// 类型定义（直接从 Drizzle schema 推断）
+// Types inferred from Drizzle schema
 export type RepoItem = typeof schema.reposTable.$inferSelect;
+
+// Lightweight type for list pages (excludes large fields like readme/repoDetails)
+export type RepoListItem = Pick<
+  RepoItem,
+  'id' | 'repo' | 'repoId' | 'description' | 'starredAt'
+>;
 
 export type SortField = 'starredAt' | 'repo';
 export type SortOrder = 'asc' | 'desc';
@@ -64,7 +70,7 @@ export const getRepos = createServerFn({ method: 'GET' })
     const trimmedQuery = query?.trim();
     const shouldSearch = !!trimmedQuery;
 
-    // 动态导入服务端模块
+    // Dynamic import for server-side modules
     const { db, schema } = await import('@proj/db');
     const { count, desc, asc, ilike, or, sql } = await import('drizzle-orm');
 
@@ -77,7 +83,16 @@ export const getRepos = createServerFn({ method: 'GET' })
 
     const orderBy = buildOrderBy({ sortBy, sortOrder, schema, asc, desc, sql });
 
-    const listBase = db.select().from(schema.reposTable);
+    // Select only fields needed for list view, avoiding large fields like readme/repoDetails
+    const listBase = db
+      .select({
+        id: schema.reposTable.id,
+        repo: schema.reposTable.repo,
+        repoId: schema.reposTable.repoId,
+        description: schema.reposTable.description,
+        starredAt: schema.reposTable.starredAt,
+      })
+      .from(schema.reposTable);
     const listQuery = whereClause ? listBase.where(whereClause) : listBase;
 
     const countBase = db.select({ count: count() }).from(schema.reposTable);
@@ -95,7 +110,7 @@ export const getRepos = createServerFn({ method: 'GET' })
     const hasMore = offset + repos.length < total;
 
     return {
-      repos: repos as Array<RepoItem>,
+      repos: repos as Array<RepoListItem>,
       total,
       hasMore,
       nextOffset: hasMore ? offset + limit : undefined,
@@ -111,7 +126,7 @@ export const getRepoById = createServerFn({ method: 'GET' })
   .handler(async ({ data }) => {
     const { id } = data;
 
-    // 动态导入服务端模块
+    // Dynamic import for server-side modules
     const { db, schema } = await import('@proj/db');
     const { sql } = await import('drizzle-orm');
 
@@ -133,7 +148,7 @@ export const getRepoByName = createServerFn({ method: 'GET' })
   .handler(async ({ data }) => {
     const { name } = data;
 
-    // 动态导入服务端模块
+    // Dynamic import for server-side modules
     const { db, schema } = await import('@proj/db');
     const { sql } = await import('drizzle-orm');
 
@@ -148,7 +163,7 @@ export const getRepoByName = createServerFn({ method: 'GET' })
 
 export const getReposCount = createServerFn({ method: 'GET' }).handler(
   async () => {
-    // 动态导入服务端模块
+    // Dynamic import for server-side modules
     const { db, schema } = await import('@proj/db');
     const { count } = await import('drizzle-orm');
 

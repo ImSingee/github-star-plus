@@ -1,10 +1,10 @@
 import { Anchor, Box, Card, Flex, Group, Text, ThemeIcon } from '@mantine/core';
 import { IconBook, IconExternalLink, IconStar } from '@tabler/icons-react';
 import dayjs from 'dayjs';
-import type { RepoItem } from '~server/repos';
+import type { RepoListItem } from '~server/repos';
 
 interface RepoCardProps {
-  repo: RepoItem;
+  repo: RepoListItem;
   variant?: 'grid' | 'list';
 }
 
