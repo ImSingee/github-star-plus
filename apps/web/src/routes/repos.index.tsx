@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import { useIntersection } from '@mantine/hooks';
-import { useEffect, useMemo, useState } from 'react';
+import { useDebouncedValue, useIntersection } from '@mantine/hooks';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActionIcon,
   Box,
@@ -59,9 +59,11 @@ function ReposPage() {
   const navigate = useNavigate();
   const { q: searchQuery } = Route.useSearch();
   const [localQuery, setLocalQuery] = useState(searchQuery || '');
+  const [debouncedQuery] = useDebouncedValue(localQuery, 300);
   const [layout, setLayout] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<SortField>('starredAt');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+  const isInitialMount = useRef(true);
 
   const { ref: loadMoreRef, entry } = useIntersection({
     threshold: 0.1,
@@ -110,24 +112,29 @@ function ReposPage() {
     }
   }, [entry?.isIntersecting, fetchNextPage, hasMore, isFetchingMore]);
 
-  const handleSearch = () => {
-    const trimmed = localQuery.trim();
-    if (trimmed) {
-      navigate({ to: '/repos', search: { q: trimmed } });
-    } else {
-      navigate({ to: '/repos', search: {} });
+  // Auto-search on debounced query change
+  useEffect(() => {
+    // Skip the initial mount to avoid unnecessary navigation
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
     }
-  };
+
+    const trimmed = debouncedQuery.trim();
+    const currentQuery = searchQuery ?? '';
+
+    // Only navigate if the query actually changed
+    if (trimmed !== currentQuery) {
+      if (trimmed) {
+        navigate({ to: '/repos', search: { q: trimmed } });
+      } else {
+        navigate({ to: '/repos', search: {} });
+      }
+    }
+  }, [debouncedQuery, navigate, searchQuery]);
 
   const handleClear = () => {
     setLocalQuery('');
-    navigate({ to: '/repos', search: {} });
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSearch();
-    }
   };
 
   const handleSortChange = (field: SortField, order: SortOrder) => {
@@ -163,7 +170,6 @@ function ReposPage() {
             placeholder="Search repositories..."
             value={localQuery}
             onChange={(e) => setLocalQuery(e.currentTarget.value)}
-            onKeyDown={handleKeyDown}
             leftSection={<IconSearch size={18} />}
             rightSection={
               localQuery && (
@@ -179,9 +185,6 @@ function ReposPage() {
             }
             style={{ flex: 1, minWidth: 200, maxWidth: 400 }}
           />
-          <Button variant="default" onClick={handleSearch}>
-            Search
-          </Button>
 
           <Flex gap="md" ml="auto">
             <Menu shadow="md" width={180}>
