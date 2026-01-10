@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from '@tanstack/react-router';
 import {
   Anchor,
+  Avatar,
   Box,
   Center,
   Container,
@@ -16,7 +17,11 @@ import {
 } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
 import { useQuery } from '@tanstack/react-query';
-import { IconArrowRight, IconBook, IconSearch } from '@tabler/icons-react';
+import {
+  IconArrowRight,
+  IconBrandGithub,
+  IconSearch,
+} from '@tabler/icons-react';
 import type { RepoListItem } from '~server/repos';
 import { getRepos, getReposCount } from '~server/repos';
 
@@ -91,7 +96,7 @@ export function SearchHero() {
       <Container size="md" py="4xl">
         <Center mih="calc(100vh - 80px)">
           <Stack align="center" gap="xl" w="100%">
-            <IconBook size={72} stroke={1.5} color="white" />
+            <IconBrandGithub size={72} stroke={1.5} color="white" />
 
             <Title order={1} c="white" ta="center" fz={{ base: 32, md: 48 }}>
               GitHub Star Plus
@@ -169,10 +174,11 @@ export function SearchHero() {
                           }}
                         >
                           <Flex gap="md" align="flex-start">
-                            <IconBook
-                              size={20}
-                              color="var(--mantine-color-slate-5)"
-                              stroke={1.5}
+                            <Avatar
+                              src={repo.ownerAvatarUrl}
+                              alt={repo.repo.split('/')[0]}
+                              size="sm"
+                              radius="sm"
                             />
                             <Box flex={1} miw={0}>
                               <Text fw={600} c="white" truncate>

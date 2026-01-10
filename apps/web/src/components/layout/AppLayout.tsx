@@ -8,7 +8,7 @@ import {
   Group,
   Text,
 } from '@mantine/core';
-import { IconBook, IconHome, IconSearch } from '@tabler/icons-react';
+import { IconBrandGithub, IconHome, IconSearch } from '@tabler/icons-react';
 
 export function AppLayout() {
   const routerState = useRouterState();
@@ -33,7 +33,10 @@ export function AppLayout() {
               fw={600}
             >
               <Flex align="center" gap="sm">
-                <IconBook size={24} color="var(--mantine-color-blue-6)" />
+                <IconBrandGithub
+                  size={24}
+                  color="var(--mantine-color-blue-6)"
+                />
                 GitHub Star+
               </Flex>
             </Anchor>
