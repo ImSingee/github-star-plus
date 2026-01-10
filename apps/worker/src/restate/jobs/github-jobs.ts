@@ -16,7 +16,7 @@ type StarredRepoItem = {
 };
 
 type UpdateRepoReadmeInput = {
-  repo: string;
+  repoId: number;
 };
 
 export const githubJobs = restate.service({
@@ -100,19 +100,20 @@ export const githubJobs = restate.service({
         const description = item.repo.description ?? '';
 
         const { readmeUpdatedAtIso } = await ctx.run(
-          `upsert-repo-${fullName}`,
+          `upsert-repo-${repoId}`,
           async () => {
             const [updatedRepo] = await db
               .update(schema.reposTable)
               .set({
                 repoId,
+                repo: fullName,
                 repoName,
                 repoDetails,
                 description,
                 starredAt,
                 descriptionUpdatedAt: sql`now()`,
               })
-              .where(eq(schema.reposTable.repo, fullName))
+              .where(eq(schema.reposTable.repoId, repoId))
               .returning({
                 readmeUpdatedAt: schema.reposTable.readmeUpdatedAt,
               });
@@ -122,8 +123,9 @@ export const githubJobs = restate.service({
               const [insertedRepo] = await db
                 .insert(schema.reposTable)
                 .values({
-                  repo: fullName,
                   repoId,
+                  repo: fullName,
+                  initialRepo: fullName,
                   repoName,
                   repoDetails,
                   description,
@@ -150,14 +152,14 @@ export const githubJobs = restate.service({
 
         // shouldUpdate() uses Math.random(), so we record the decision in a ctx.run step.
         const shouldUpdateReadme = await ctx.run(
-          `should-update-readme-${fullName}`,
+          `should-update-readme-${repoId}`,
           () => shouldUpdate(readmeUpdatedAt, 30),
         );
 
         if (shouldUpdateReadme) {
           const result = await ctx
             .serviceClient(githubJobs)
-            .updateRepoReadme({ repo: fullName });
+            .updateRepoReadme({ repoId });
 
           if ('updatedId' in result && result.updatedId !== null) {
             readmeUpdated += 1;
@@ -170,8 +172,21 @@ export const githubJobs = restate.service({
 
     updateRepoReadme: async (
       ctx: restate.Context,
-      { repo: fullName }: UpdateRepoReadmeInput,
+      { repoId }: UpdateRepoReadmeInput,
     ) => {
+      const [dbRepo] = await ctx.run('fetch-repo-full-name', async () => {
+        return await db
+          .select({ repo: schema.reposTable.repo })
+          .from(schema.reposTable)
+          .where(eq(schema.reposTable.repoId, repoId))
+          .limit(1);
+      });
+
+      const fullName = dbRepo?.repo ?? null;
+      if (!fullName) {
+        return { skipped: true };
+      }
+
       const [owner, repo] = fullName.split('/');
 
       const readme = await ctx.run('fetch-readme', async () => {
@@ -209,7 +224,7 @@ export const githubJobs = restate.service({
             initialReadme: sql`COALESCE(${schema.reposTable.initialReadme}, ${readme})`,
             readmeUpdatedAt: sql`now()`,
           })
-          .where(eq(schema.reposTable.repo, fullName))
+          .where(eq(schema.reposTable.repoId, repoId))
           .returning({ id: schema.reposTable.id });
       });
 

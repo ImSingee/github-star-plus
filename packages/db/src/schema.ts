@@ -33,8 +33,9 @@ export const reposTable = pgTable(
   'repos',
   {
     id: serial('id').primaryKey(),
+    repoId: bigint('repo_id', { mode: 'number' }).notNull(),
     repo: text('repo').notNull(),
-    repoId: bigint('repo_id', { mode: 'number' }),
+    initialRepo: text('initial_repo').notNull(),
     repoName: text('repo_name'),
     repoDetails: jsonb('repo_details').$type<JsonObject>(),
     description: text('description'),
@@ -49,6 +50,7 @@ export const reposTable = pgTable(
   },
   (table) => [
     uniqueIndex('repos_repo').on(table.repo),
+    uniqueIndex('repos_repo_id').on(table.repoId),
     index('repos_starred_at').on(table.starredAt),
     index('repos_repo_name').on(table.repoName),
   ],
