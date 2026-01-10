@@ -18,7 +18,7 @@ import { useDebouncedValue } from '@mantine/hooks';
 import { useQuery } from '@tanstack/react-query';
 import { IconArrowRight, IconBook, IconSearch } from '@tabler/icons-react';
 import type { RepoItem } from '~server/repos';
-import { getReposCount, searchRepos } from '~server/repos';
+import { getRepos, getReposCount } from '~server/repos';
 
 export function SearchHero() {
   const navigate = useNavigate();
@@ -34,8 +34,9 @@ export function SearchHero() {
   });
 
   const { data: searchResults, isLoading: isSearching } = useQuery({
-    queryKey: ['search-repos', debouncedQuery],
-    queryFn: () => searchRepos({ data: { query: debouncedQuery, limit: 8 } }),
+    queryKey: ['search-repos', 'suggestions', debouncedQuery],
+    queryFn: () =>
+      getRepos({ data: { query: debouncedQuery, limit: 8, offset: 0 } }),
     enabled: debouncedQuery.length > 0,
     staleTime: 30 * 1000,
   });

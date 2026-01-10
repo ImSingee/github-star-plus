@@ -32,7 +32,7 @@ import {
 } from '@tabler/icons-react';
 import { z } from 'zod';
 import type { SortField, SortOrder } from '~server/repos';
-import { getRepos, getReposCount, searchRepos } from '~server/repos';
+import { getRepos, getReposCount } from '~server/repos';
 import { RepoCard } from '~components/repos/RepoCard';
 
 const searchSchema = z.object({
@@ -74,84 +74,41 @@ function ReposPage() {
   });
 
   const {
-    data: searchData,
-    fetchNextPage: fetchNextSearchPage,
-    hasNextPage: hasNextSearchPage,
-    isFetchingNextPage: isFetchingNextSearchPage,
-    isLoading: isSearchLoading,
+    data: reposData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
   } = useInfiniteQuery({
-    queryKey: ['search-repos-infinite', searchQuery, sortBy, sortOrder],
+    queryKey: ['search-repos', 'list', searchQuery ?? '', sortBy, sortOrder],
     queryFn: async ({ pageParam = 0 }) => {
-      const result = await searchRepos({
+      return getRepos({
         data: {
-          query: searchQuery!,
+          query: searchQuery,
           limit: 30,
           offset: pageParam,
           sortBy,
           sortOrder,
         },
       });
-      return {
-        ...result,
-        nextOffset: pageParam + 30,
-      };
     },
-    enabled: !!searchQuery,
-    getNextPageParam: (lastPage) =>
-      lastPage.repos.length === 30 ? lastPage.nextOffset : undefined,
-    initialPageParam: 0,
-    staleTime: 30 * 1000,
-  });
-
-  const {
-    data: reposData,
-    fetchNextPage: fetchNextReposPage,
-    hasNextPage: hasNextReposPage,
-    isFetchingNextPage: isFetchingNextReposPage,
-    isLoading: isReposLoading,
-  } = useInfiniteQuery({
-    queryKey: ['repos-infinite', sortBy, sortOrder],
-    queryFn: async ({ pageParam = 0 }) => {
-      return getRepos({
-        data: { limit: 30, offset: pageParam, sortBy, sortOrder },
-      });
-    },
-    enabled: !searchQuery,
     getNextPageParam: (lastPage) => lastPage.nextOffset,
     initialPageParam: 0,
     staleTime: 30 * 1000,
   });
 
-  const isSearchMode = !!searchQuery;
   const repos = useMemo(() => {
-    if (isSearchMode) {
-      return searchData?.pages.flatMap((page) => page.repos) ?? [];
-    }
     return reposData?.pages.flatMap((page) => page.repos) ?? [];
-  }, [isSearchMode, searchData, reposData]);
+  }, [reposData]);
 
-  const isLoading = isSearchMode ? isSearchLoading : isReposLoading;
-  const isFetchingMore = isSearchMode
-    ? isFetchingNextSearchPage
-    : isFetchingNextReposPage;
-  const hasMore = isSearchMode ? hasNextSearchPage : hasNextReposPage;
+  const isFetchingMore = isFetchingNextPage;
+  const hasMore = hasNextPage;
 
   useEffect(() => {
     if (entry?.isIntersecting && hasMore && !isFetchingMore) {
-      if (isSearchMode) {
-        fetchNextSearchPage();
-      } else {
-        fetchNextReposPage();
-      }
+      fetchNextPage();
     }
-  }, [
-    entry?.isIntersecting,
-    hasMore,
-    isFetchingMore,
-    isSearchMode,
-    fetchNextSearchPage,
-    fetchNextReposPage,
-  ]);
+  }, [entry?.isIntersecting, fetchNextPage, hasMore, isFetchingMore]);
 
   const handleSearch = () => {
     const trimmed = localQuery.trim();
@@ -195,8 +152,8 @@ function ReposPage() {
           </Title>
           <Text c="dimmed">
             {totalCount?.toLocaleString() ?? '—'} starred repositories
-            {searchQuery && searchData && (
-              <> · {searchData.pages[0]?.total ?? 0} results found</>
+            {searchQuery && reposData && (
+              <> · {reposData.pages[0]?.total ?? 0} results found</>
             )}
           </Text>
         </Box>
@@ -335,14 +292,7 @@ function ReposPage() {
                 {isFetchingMore ? (
                   <Loader size="sm" />
                 ) : (
-                  <Button
-                    variant="subtle"
-                    onClick={() =>
-                      isSearchMode
-                        ? fetchNextSearchPage()
-                        : fetchNextReposPage()
-                    }
-                  >
+                  <Button variant="subtle" onClick={() => fetchNextPage()}>
                     Load More
                   </Button>
                 )}
