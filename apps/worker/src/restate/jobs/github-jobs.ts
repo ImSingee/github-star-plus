@@ -8,8 +8,10 @@ import { getOctokit, hasNextPage } from '@proj/github';
 type StarredRepoItem = {
   starred_at: string | Date;
   repo: {
+    name: string;
     full_name: string;
     description?: string | null;
+    [key: string]: unknown;
   };
 };
 
@@ -91,6 +93,8 @@ export const githubJobs = restate.service({
       let readmeUpdated = 0;
       for (const item of items) {
         const fullName = item.repo.full_name;
+        const repoName = item.repo.name;
+        const repoDetails = item.repo;
         const starredAt = new Date(item.starred_at);
         const description = item.repo.description ?? '';
 
@@ -100,6 +104,8 @@ export const githubJobs = restate.service({
             const [updatedRepo] = await db
               .update(schema.reposTable)
               .set({
+                repoName,
+                repoDetails,
                 description,
                 starredAt,
                 descriptionUpdatedAt: sql`now()`,
@@ -115,6 +121,8 @@ export const githubJobs = restate.service({
                 .insert(schema.reposTable)
                 .values({
                   repo: fullName,
+                  repoName,
+                  repoDetails,
                   description,
                   initialDescription: description,
                   descriptionUpdatedAt: sql`now()`,

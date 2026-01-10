@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm';
 import {
   timestamp as _timestamp,
   index,
+  jsonb,
   pgTable,
   serial,
   text,
@@ -31,6 +32,8 @@ export const reposTable = pgTable(
   {
     id: serial('id').primaryKey(),
     repo: text('repo').notNull(),
+    repoName: text('repo_name'),
+    repoDetails: jsonb('repo_details').$type<Record<string, unknown>>(),
     description: text('description'),
     initialDescription: text('initial_description'),
     readme: text('readme').default(''),
