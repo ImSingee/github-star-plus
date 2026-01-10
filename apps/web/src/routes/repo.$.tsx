@@ -3,6 +3,7 @@ import { queryOptions, useSuspenseQuery } from '@tanstack/react-query';
 import { Suspense } from 'react';
 import {
   Anchor,
+  Avatar,
   Badge,
   Box,
   Button,
@@ -21,7 +22,6 @@ import {
 } from '@mantine/core';
 import {
   IconArrowLeft,
-  IconBook,
   IconExternalLink,
   IconFileText,
   IconInfoCircle,
@@ -117,10 +117,13 @@ function RepoContent({ fullName }: { fullName: string }) {
         </Anchor>
 
         <Stack gap="md">
-          <Flex gap="lg" align="center">
-            <ThemeIcon size={56} variant="light" color="blue" radius="md">
-              <IconBook size={28} stroke={1.5} />
-            </ThemeIcon>
+          <Flex gap="md" align="center">
+            <Avatar
+              src={repo.ownerAvatarUrl}
+              alt={owner}
+              size="lg"
+              radius="sm"
+            />
             <Box>
               <Title order={1} mb={4}>
                 {repoName}

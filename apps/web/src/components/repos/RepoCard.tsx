@@ -1,5 +1,5 @@
-import { Anchor, Box, Card, Flex, Group, Text, ThemeIcon } from '@mantine/core';
-import { IconBook, IconExternalLink, IconStar } from '@tabler/icons-react';
+import { Anchor, Avatar, Box, Card, Flex, Group, Text } from '@mantine/core';
+import { IconExternalLink, IconStar } from '@tabler/icons-react';
 import dayjs from 'dayjs';
 import type { RepoListItem } from '~server/repos';
 
@@ -31,9 +31,12 @@ export function RepoCard({ repo, variant = 'grid' }: RepoCardProps) {
           }}
         >
           <Flex gap="sm" align="center">
-            <ThemeIcon variant="light" size="sm" color="blue" radius="sm">
-              <IconBook size={14} stroke={1.5} />
-            </ThemeIcon>
+            <Avatar
+              src={repo.ownerAvatarUrl}
+              alt={owner}
+              size="sm"
+              radius="sm"
+            />
 
             <Text fw={600} size="sm" w={180} style={{ flexShrink: 0 }} truncate>
               {repoName}
@@ -106,9 +109,7 @@ export function RepoCard({ repo, variant = 'grid' }: RepoCardProps) {
         }}
       >
         <Flex gap="md" align="flex-start" mb="sm">
-          <ThemeIcon variant="light" size="lg" color="blue" radius="md">
-            <IconBook size={20} stroke={1.5} />
-          </ThemeIcon>
+          <Avatar src={repo.ownerAvatarUrl} alt={owner} size="md" radius="sm" />
           <Box flex={1} miw={0}>
             <Text fw={600} size="md" truncate>
               {repoName}

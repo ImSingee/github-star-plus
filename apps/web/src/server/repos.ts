@@ -8,7 +8,7 @@ export type RepoItem = typeof schema.reposTable.$inferSelect;
 // Lightweight type for list pages (excludes large fields like readme/repoDetails)
 export type RepoListItem = Pick<
   RepoItem,
-  'id' | 'repo' | 'repoId' | 'description' | 'starredAt'
+  'id' | 'repo' | 'repoId' | 'description' | 'starredAt' | 'ownerAvatarUrl'
 >;
 
 export type SortField = 'starredAt' | 'repo';
@@ -91,6 +91,7 @@ export const getRepos = createServerFn({ method: 'GET' })
         repoId: schema.reposTable.repoId,
         description: schema.reposTable.description,
         starredAt: schema.reposTable.starredAt,
+        ownerAvatarUrl: schema.reposTable.ownerAvatarUrl,
       })
       .from(schema.reposTable);
     const listQuery = whereClause ? listBase.where(whereClause) : listBase;
