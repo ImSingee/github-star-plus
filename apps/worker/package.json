@@ -16,7 +16,7 @@
     "@proj/github": "workspace:*",
     "@restatedev/restate-sdk": "^1.0.0",
     "cron-parser": "^5.4.0",
-    "drizzle-orm": "1.0.0-beta.8-734e789",
+    "drizzle-orm": "1.0.0-beta.10-42c284e",
     "octokit": "^4.0.0"
   },
   "devDependencies": {
